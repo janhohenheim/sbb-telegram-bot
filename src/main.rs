@@ -1,44 +1,77 @@
-extern crate futures;
-extern crate telegram_bot;
-extern crate tokio_core;
+#![feature(plugin)]
+#![plugin(rocket_codegen)]
+extern crate serde;
+extern crate rocket;
+extern crate serde_json;
+#[macro_use]
+extern crate serde_derive;  
 
-use std::env;
+use rocket::response::content::JSON;
 
-use futures::Stream;
-use tokio_core::reactor::Core;
-use telegram_bot::*;
+#[post("/sbb/telegram/update", format = "application/json", data = "<update>")]
+fn telegram_update(update: JSON<Update>) -> String {
+    "hi".to_owned()
+}
+
+#[get("/hello/<name>/<age>")]
+fn hello(name: &str, age: u8) -> String {
+    format!("Hello, {} year old named {}!", age, name)
+}
 
 fn main() {
-    let mut core = Core::new().unwrap();
+    rocket::ignite().mount("/", routes![hello]).launch();
+}
 
-    let token = env::var("TELEGRAM_BOT_TOKEN").unwrap();
-    let api = Api::configure(token).build(core.handle());
+#[derive(Serialize, Deserialize)]
+struct Update {
+    update_id: i32,
+    message: Option<Message>,
+    edited_message: Option<Message>,
+    channel_post: Option<Message>,
+    edited_channel_post: Option<Message>,
+    inline_query: Option<InlineQuery>,
+    chosen_inline_result: Option<ChosenInlineResult>,
+    callback_query: Option<CallbackQuery>,
+    shipping_query: Option<ShippingQuery>,
+    pre_checkout_query: Option<PreCheckoutQuery>,
+}
 
-    // Fetch new updates via long poll method
-    let future = api.stream().for_each(|update| {
+#[derive(Serialize, Deserialize)]
+struct Message {
 
-        // If the received update contains a new message...
-        if let UpdateKind::Message(message) = update.kind {
+}
 
-            // Get sender's first name if available.
-            let first_name = match message.from.as_ref() {
-                Some(from) => &from.first_name,
-                None => return Ok(()) // Skip a message.
-            };
+#[derive(Serialize, Deserialize)]
+struct InlineQuery {
 
-            if let MessageKind::Text {ref data, ..} = message.kind {
-                // Print received text message to stdout.
-                println!("<{}>: {}", first_name, data);
+}
 
-                // Answer message with "Hi".
-                api.spawn(message.text_reply(
-                    format!("Hi, {}! You just wrote '{}'", first_name, data)
-                ));
-            }
-        }
+#[derive(Serialize, Deserialize)]
+struct ChosenInlineResult {
 
-        Ok(())
-    });
+}
 
-    core.run(future).unwrap();
+#[derive(Serialize, Deserialize)]
+struct CallbackQuery {
+
+}
+
+#[derive(Serialize, Deserialize)]
+struct ShippingQuery {
+
+}
+
+#[derive(Serialize, Deserialize)]
+struct PreCheckoutQuery {
+
+}
+
+#[derive(Serialize, Deserialize)]
+struct User {
+
+}
+
+#[derive(Serialize, Deserialize)]
+struct Chat {
+    
 }

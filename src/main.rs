@@ -2,6 +2,7 @@ extern crate iron;
 #[macro_use]
 extern crate router;
 extern crate serde_json;
+extern crate sbb_telegram_bot;
 
 
 use iron::prelude::*;
@@ -9,6 +10,7 @@ use iron::status;
 use iron::{Iron, Request, Response, IronResult, AfterMiddleware, Chain};
 use router::NoRoute;
 use std::io::Read;
+use sbb_telegram_bot::model::telegram;
 
 struct Custom404;
 
@@ -39,7 +41,12 @@ fn main() {
                 )
             )?;
         let body = String::from_utf8(body).unwrap();
-        println!("{}", body);
+        let update: telegram::Update = serde_json::from_str(&body).unwrap();
+        if let Some(msg) = update.message {
+            if let Some(txt) = msg.text {
+                println!("{}", txt);
+            }
+        }
         Ok(Response::with((status::Ok, "ok")))
     }
 }

@@ -7,7 +7,6 @@ extern crate serde_derive;
 
 use iron::prelude::*;
 use iron::status;
-use router::Router;
 
 use std::io::Read;
 fn main() {
@@ -59,24 +58,9 @@ struct Message {
     reply_to_message: Box<Option<Message>>,
     edit_date: Option<i32>,
     text: Option<String>,
-    entities: Option<Vec<MessageEntity>>,
-    audio: Option<Audio>,
-    document: Option<Document>,
-    game: Option<Game>,
-    photo: Option<Vec<PhotoSize>>,
-    sticker: Option<Sticker>,
-    video: Option<Video>,
-    voice: Option<Voice>,
-    video_note: Option<VideoNote>,
-    new_chat_members: Option<Vec<User>>,
-    caption: Option<String>,
-    contact: Option<Contact>,
-    location: Option<Location>,
-    venue: Option<Venue>,
     new_chat_member: Option<User>,
     left_chat_member: Option<User>,
     new_chat_title: Option<String>,
-    new_chat_photo: Option<Vec<PhotoSize>>,
     delete_chat_photo: Option<bool>,
 }
 

@@ -10,7 +10,7 @@ use iron::status;
 use router::Router;
 
 use std::io::Read;
-fn main() {   
+fn main() {
     let router = router!(telegram: post "/telegram" => telegram);
 
     Iron::new(router).http("localhost:3000").unwrap();
@@ -20,7 +20,11 @@ fn main() {
         req
             .body
             .read_to_end(&mut body)
-            .map_err(|e| IronError::new(e, (status::InternalServerError, "Error reading request")))?;
+            .map_err(|e|
+                IronError::new(e,
+                    (status::InternalServerError, "Error reading request")
+                )
+            )?;
         let body = String::from_utf8(body).unwrap();
         println!("{}", body);
         Ok(Response::with((status::Ok, "ok")))
@@ -78,7 +82,7 @@ struct Message {
 
 #[derive(Serialize, Deserialize)]
 struct InlineQuery {
-    update_id: i32,  
+    update_id: i32,
     from: User,
     location: Option<Location>,
     query: String,
@@ -87,7 +91,7 @@ struct InlineQuery {
 
 #[derive(Serialize, Deserialize)]
 struct ChosenInlineResult {
-    update_id: i32,  
+    update_id: i32,
     from: User,
     location: Option<Location>,
     inline_message_id: Option<String>,
@@ -96,13 +100,13 @@ struct ChosenInlineResult {
 
 #[derive(Serialize, Deserialize)]
 struct CallbackQuery {
-    result: i32,  
+    result: i32,
     from: User,
     message: Option<String>,
     inline_message_id: Option<String>,
     chat_instance: String,
     data: Option<String>,
-    game_short_name: Option<String>
+    game_short_name: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -115,7 +119,7 @@ struct ShippingQuery {
 
 #[derive(Serialize, Deserialize)]
 struct ShippingOption {
-    id:String,
+    id: String,
     from: User,
     invoice_payload: String,
     shipping_address: ShippingAddress,
@@ -123,23 +127,23 @@ struct ShippingOption {
 
 #[derive(Serialize, Deserialize)]
 struct ShippingAddress {
-   country_code: String,
-   state: String,
-   city: String,
-   street_line1: String,
-   street_line2: String,
-   post_code: String,
+    country_code: String,
+    state: String,
+    city: String,
+    street_line1: String,
+    street_line2: String,
+    post_code: String,
 }
 
 #[derive(Serialize, Deserialize)]
 struct PreCheckoutQuery {
-id:String,
-from: User,
-currency: String,
-total_amount: i32,
-invoice_payload: String,
-shipping_option_id: Option<String>,
-order_info: Option<OrderInfo>,
+    id: String,
+    from: User,
+    currency: String,
+    total_amount: i32,
+    invoice_payload: String,
+    shipping_option_id: Option<String>,
+    order_info: Option<OrderInfo>,
 }
 
 
@@ -153,9 +157,10 @@ struct User {
 }
 
 #[derive(Serialize, Deserialize)]
+#[serde(chat_type = "type")]
 struct Chat {
     id: i32,
-    type: String,
+    chat_type: String,
     title: Option<String>,
     username: Option<String>,
     first_name: Option<String>,
@@ -165,14 +170,14 @@ struct Chat {
 
 #[derive(Serialize, Deserialize)]
 struct Location {
-longitude: f64,
-latitude: f64,
+    longitude: f64,
+    latitude: f64,
 }
 
 #[derive(Serialize, Deserialize)]
 struct OrderInfo {
-name: Option<String>,
-phone_number: Option<String>,
-email: Option<String>,
-shipping_address: Option<String>,
+    name: Option<String>,
+    phone_number: Option<String>,
+    email: Option<String>,
+    shipping_address: Option<String>,
 }

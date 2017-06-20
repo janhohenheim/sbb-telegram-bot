@@ -77,6 +77,7 @@ struct Message {
 }
 
 #[derive(Serialize, Deserialize)]
+<<<<<<< HEAD
 struct InlineQuery {}
 
 #[derive(Serialize, Deserialize)]
@@ -90,6 +91,72 @@ struct ShippingQuery {}
 
 #[derive(Serialize, Deserialize)]
 struct PreCheckoutQuery {}
+=======
+struct InlineQuery {
+    update_id: i32,  
+    from: User,
+    location: Option<Location>,
+    query: String,
+    offset: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct ChosenInlineResult {
+    update_id: i32,  
+    from: User,
+    location: Option<Location>,
+    inline_message_id: Option<String>,
+    query: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct CallbackQuery {
+    result: i32,  
+    from: User,
+    message: Option<String>,
+    inline_message_id: Option<String>,
+    chat_instance: String,
+    data: Option<String>,
+    game_short_name: Option<String>
+}
+
+#[derive(Serialize, Deserialize)]
+struct ShippingQuery {
+    shipping_query_id: String,
+    ok: bool,
+    shipping_options: Option<Vec<ShippingOption>>,
+    error_message: Option<String>,
+}
+
+#[derive(Serialize, Deserialize)]
+struct ShippingOption {
+    id:String,
+    from: User,
+    invoice_payload: String,
+    shipping_address: ShippingAddress,
+}
+
+#[derive(Serialize, Deserialize)]
+struct ShippingAddress {
+   country_code: String,
+   state: String,
+   city: String,
+   street_line1: String,
+   street_line2: String,
+   post_code: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct PreCheckoutQuery {
+id:String,
+from: User,
+currency: String,
+total_amount: i32,
+invoice_payload: String,
+shipping_option_id: Option<String>,
+order_info: Option<OrderInfo>,
+}
+>>>>>>> 6b26047d851624e86d57bd384597577953c6d94f
 
 #[derive(Serialize, Deserialize)]
 struct User {}
@@ -98,4 +165,24 @@ struct User {}
 struct Chat {}
 
 #[derive(Serialize, Deserialize)]
+<<<<<<< HEAD
 struct MessageEntity {}
+=======
+struct Chat {
+    
+}
+
+#[derive(Serialize, Deserialize)]
+struct Location {
+longitude: f64,
+latitude: f64,
+}
+
+#[derive(Serialize, Deserialize)]
+struct OrderInfo {
+name: Option<String>,
+phone_number: Option<String>,
+email: Option<String>,
+shipping_address: Option<String>,
+}
+>>>>>>> 6b26047d851624e86d57bd384597577953c6d94f

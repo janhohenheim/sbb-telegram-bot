@@ -15,7 +15,7 @@ struct Custom404;
 impl AfterMiddleware for Custom404 {
     fn catch(&self, req: &mut Request, err: IronError) -> IronResult<Response> {
         if let Some(_) = err.error.downcast::<NoRoute>() {
-            Ok(Response::with((status::NotFound, format!("Invalid request: {}",req.url))))
+            Ok(Response::with((status::NotFound, format!("Invalid request: {}", req.url))))
         } else {
             Err(err)
         }
@@ -43,4 +43,3 @@ fn main() {
         Ok(Response::with((status::Ok, "ok")))
     }
 }
-

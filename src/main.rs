@@ -157,9 +157,9 @@ struct User {
 }
 
 #[derive(Serialize, Deserialize)]
-#[serde(chat_type = "type")]
 struct Chat {
     id: i32,
+    #[serde(rename = "type")]
     chat_type: String,
     title: Option<String>,
     username: Option<String>,

@@ -1,0 +1,11 @@
+[package]
+name = "sbb-telegram-bot"
+version = "0.1.0"
+authors = ["Jan Nils Ferner <jn_ferner@hotmail.de>", "Lukas Hunziker <lucuhu@gmail.com>"]
+
+[dependencies]
+rocket = "0.2"
+rocket_codegen = "0.2"
+serde = "1"
+serde_json = "1"
+serde_derive = "1"

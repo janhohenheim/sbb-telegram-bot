@@ -142,15 +142,25 @@ shipping_option_id: Option<String>,
 order_info: Option<OrderInfo>,
 }
 
-#[derive(Serialize, Deserialize)]
-struct User {}
 
 #[derive(Serialize, Deserialize)]
-struct Chat {}
+struct User {
+    id: i32,
+    first_name: Option<String>,
+    last_name: Option<String>,
+    username: Option<String>,
+    language_code: Option<String>,
+}
 
 #[derive(Serialize, Deserialize)]
 struct Chat {
-    
+    id: i32,
+    type: String,
+    title: Option<String>,
+    username: Option<String>,
+    first_name: Option<String>,
+    last_name: Option<String>,
+    all_members_are_administrators: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize)]

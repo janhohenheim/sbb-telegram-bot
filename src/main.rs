@@ -77,21 +77,6 @@ struct Message {
 }
 
 #[derive(Serialize, Deserialize)]
-<<<<<<< HEAD
-struct InlineQuery {}
-
-#[derive(Serialize, Deserialize)]
-struct ChosenInlineResult {}
-
-#[derive(Serialize, Deserialize)]
-struct CallbackQuery {}
-
-#[derive(Serialize, Deserialize)]
-struct ShippingQuery {}
-
-#[derive(Serialize, Deserialize)]
-struct PreCheckoutQuery {}
-=======
 struct InlineQuery {
     update_id: i32,  
     from: User,
@@ -156,7 +141,6 @@ invoice_payload: String,
 shipping_option_id: Option<String>,
 order_info: Option<OrderInfo>,
 }
->>>>>>> 6b26047d851624e86d57bd384597577953c6d94f
 
 #[derive(Serialize, Deserialize)]
 struct User {}
@@ -165,9 +149,6 @@ struct User {}
 struct Chat {}
 
 #[derive(Serialize, Deserialize)]
-<<<<<<< HEAD
-struct MessageEntity {}
-=======
 struct Chat {
     
 }
@@ -185,4 +166,3 @@ phone_number: Option<String>,
 email: Option<String>,
 shipping_address: Option<String>,
 }
->>>>>>> 6b26047d851624e86d57bd384597577953c6d94f

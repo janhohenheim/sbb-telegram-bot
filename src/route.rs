@@ -7,7 +7,7 @@ use self::iron::prelude::*;
 use self::iron::status;
 use self::iron::{ Request, Response, IronResult};
 
-use super::util::bot_token;
+use super::util::{BotData, read_bot_data};
 use super::model::telegram;
 
 use std::io::Read;
@@ -24,7 +24,7 @@ pub fn telegram(req: &mut Request) -> IronResult<Response> {
             if txt == "/start" {
                 let url = format!("{}{}{}",
                                   "https://api.telegram.org/bot",
-                                  bot_token(),
+                                  read_bot_data(BotData::Token),
                                   "/sendMessage");
                 let params = hashmap![
                     "chat_id" => format!("{}", msg.chat.id),

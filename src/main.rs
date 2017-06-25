@@ -12,6 +12,4 @@ fn main() {
     dotenv().ok();
     let router = router!(telegram: post "/sbb/telegram" => route::telegram);
     Iron::new(router).http("localhost:3001").unwrap();
-
-
 }

@@ -9,12 +9,14 @@ use std::env;
 pub enum BotData {
     Token,
     Name,
+    IdFile,
 }
 
 pub fn read_bot_data(data: &BotData) -> String {
     let env_var = match *data {
         BotData::Token => "TELEGRAM_BOT_TOKEN",
         BotData::Name => "TELEGRAM_BOT_NAME",
+        BotData::IdFile => "TELEGRAM_BOT_CHAT_ID_FILE"
     };
     read_env_var(env_var)
 }

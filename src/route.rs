@@ -18,17 +18,15 @@ pub fn telegram(req: &mut Request) -> IronResult<Response> {
         .read_to_string(&mut body)
         .map_err(|e| IronError::new(e, (status::BadRequest, "Error reading request")))?;
     let update: telegram::Update = serde_json::from_str(&body).unwrap();
-    if let Some(msg) = update.channel_post {
+    if let Some(msg) = update.message {
         if let Some(txt) = msg.text {
-            if txt == format!("/start@{}", read_bot_data(&BotData::Name)) {
+            let is_private = msg.chat.chat_type == "private";
+            let stated_privately = is_private && txt == "/start";
+            let started_with_identifier = txt == format!("/start@{}", read_bot_data(&BotData::Name));
+            
+            if stated_privately || started_with_identifier {
                 respond_start(msg.chat.id)?;
-            }
-        }
-    } else if let Some(msg) = update.message {
-        if let Some(txt) = msg.text {
-            if txt == "/start" {
-                respond_start(msg.chat.id)?;
-            } else {
+            } else if is_private {
                 respond_unknown(msg.chat.id)?;
             }
         }

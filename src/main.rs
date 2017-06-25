@@ -19,22 +19,11 @@ use std::io::Read;
 use sbb_telegram_bot::model::telegram;
 struct Custom404;
 
-impl AfterMiddleware for Custom404 {
-    fn catch(&self, req: &mut Request, err: IronError) -> IronResult<Response> {
-        if let Some(_) = err.error.downcast::<NoRoute>() {
-            Ok(Response::with((status::NotFound, format!("Invalid request: {}", req.url))))
-        } else {
-            Err(err)
-        }
-    }
-}
 
 fn main() {
     dotenv().ok();
     let router = router!(telegram: post "/sbb/telegram" => telegram);
-    let mut chain = Chain::new(router);
-    chain.link_after(Custom404);
-    Iron::new(chain).http("localhost:3001").unwrap();
+    Iron::new(router).http("localhost:3001").unwrap();
 
 
     fn telegram(req: &mut Request) -> IronResult<Response> {
@@ -59,7 +48,7 @@ fn main() {
                     ];
                     let client = reqwest::Client::new().map_err(|e| {
                                      IronError::new(e,
-                                                    (status::BadRequest, "Error reading request"))
+                                                    (status::InternalServerError, "Error setting up HTTP client"))
                                  })?;
                     client.post(&url)
                         .json(&params)

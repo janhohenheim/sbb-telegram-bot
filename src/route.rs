@@ -1,12 +1,10 @@
 extern crate iron;
 extern crate serde_json;
 extern crate reqwest;
-extern crate csv;
-
 use self::iron::prelude::*;
 use self::iron::{status, Request, Response, IronResult};
 
-use super::util::{BotData, read_bot_data, send};
+use super::util::{BotData, read_bot_data, register, send};
 use super::model::telegram;
 
 use std::io::Read;
@@ -53,17 +51,17 @@ fn strip_identifier(msg: &str) -> String {
 }
 
 fn respond_start(chat_id: i32) -> IronResult<()> {
-    send(chat_id,
-         "If the bot was already working, \
-            you would now have registered yourself. \
-            Alas, as this is only a placeholder text, \
-            nothing happened")?;
+    register(chat_id).map_err(|e| {
+                     IronError::new(e,
+                                    (status::InternalServerError, "Error registering chat id"))
+                 })?;
+    send(chat_id, "Successfully registered!")?;
     Ok(())
 }
 
 fn respond_help(chat_id: i32) -> IronResult<()> {
     send(chat_id,
-        "Available commands:\n\
+         "Available commands:\n\
         /start: Subscribes this chat to be notified of SBB delays\n\
         /help: Shows this window")?;
     Ok(())
@@ -71,27 +69,5 @@ fn respond_help(chat_id: i32) -> IronResult<()> {
 
 fn respond_unknown(chat_id: i32) -> IronResult<()> {
     send(chat_id, "Unknown command. Try using /help")?;
-    Ok(())
-}
-
-fn broadcast(msg: &str) -> IronResult<()> {
-    let id_file = read_bot_data(&BotData::IdFile);
-    let mut rdr = csv::ReaderBuilder::new()
-        .has_headers(false)
-        .from_path(id_file)
-        .expect("error creating csv reading");
-    for id in rdr.records() {
-        if let Ok(id) = id {
-            match id[0].parse::<i32>() {
-                Ok(id) => send(id, msg)?,
-                Err(e) => {
-                    println!("Error converting chat id into i32: {:?}", e);
-                    continue;
-                }
-            };
-        } else {
-            println!("Error reading chat id: {:?}", id);
-        }
-    }
     Ok(())
 }

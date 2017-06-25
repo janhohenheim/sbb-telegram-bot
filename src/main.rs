@@ -38,15 +38,10 @@ fn main() {
 
 
     fn telegram(req: &mut Request) -> IronResult<Response> {
-        let mut body = Vec::new();
+        let mut body = String::new();
         req.body
-            .read_to_end(&mut body)
-            .map_err(|e|
-                IronError::new(e,
-                    (status::InternalServerError, "Error reading request")
-                )
-            )?;
-        let body = String::from_utf8(body).unwrap();
+            .read_to_string(&mut body)
+            .map_err(|e| IronError::new(e, (status::BadRequest, "Error reading request")))?;
         let update: telegram::Update = serde_json::from_str(&body).unwrap();
         if let Some(msg) = update.message {
             if let Some(txt) = msg.text {
@@ -62,7 +57,10 @@ fn main() {
                                     Alas, as this is only a placeholder text, \
                                     nothing happened".to_owned(),
                     ];
-                    let client = reqwest::Client::new().unwrap();
+                    let client = reqwest::Client::new().map_err(|e| {
+                                     IronError::new(e,
+                                                    (status::BadRequest, "Error reading request"))
+                                 })?;
                     client.post(&url)
                         .json(&params)
                         .send()

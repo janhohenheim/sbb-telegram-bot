@@ -19,14 +19,14 @@ impl Display for Tweet {
             txt.insert(pos + 1, '*');
         }
         if let Some(pos) = txt.find("http") {
-            txt.insert_str(pos, "_[info](");
+            txt.insert_str(pos, "[info](");
             let end = {
                 let after_link = &txt[pos..];
                 let link_end =
                     after_link.find(char::is_whitespace).unwrap_or_else(|| after_link.len());
                 pos + link_end
             };
-            txt.insert_str(end, ")_");
+            txt.insert_str(end, ")");
         }
         if let Some(pos) = txt.find('#') {
             txt = txt[..pos].to_owned();

@@ -19,7 +19,7 @@ fn main() {
 
 fn broadcast_loop() {
     loop {
-        thread::sleep(Duration::from_secs(60*60));
+        thread::sleep(Duration::from_secs(60 * 60));
         let msg = "An SBB delay occured!\n\
             Haha! Got you there, this is just a dummy text 😜";
         util::broadcast(msg).unwrap();

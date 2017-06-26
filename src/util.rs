@@ -88,8 +88,8 @@ pub fn register(chat_id: i32) -> Result<bool, BroadcastErr> {
 }
 
 pub fn chat_ids() -> Result<Vec<i32>, BroadcastErr> {
-    create_ids_file_if_not_exists();
     let id_file = read_env_var(&EnvVar::IdFile);
+    create_file_if_not_exists(&id_file);
     let mut rdr = csv::ReaderBuilder::new()
         .has_headers(false)
         .from_path(id_file)
@@ -99,11 +99,6 @@ pub fn chat_ids() -> Result<Vec<i32>, BroadcastErr> {
         ids.push(record?[0].parse::<i32>()?);
     }
     Ok(ids)
-}
-
-pub fn create_ids_file_if_not_exists() {
-    let id_file = read_env_var(&EnvVar::IdFile);
-    create_file_if_not_exists(&id_file);
 }
 
 fn create_file_if_not_exists(name: &str) {

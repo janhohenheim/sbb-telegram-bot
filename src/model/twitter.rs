@@ -1,5 +1,10 @@
-#[derive(Serialize, Deserialize)]
+extern crate chrono;
+use self::chrono::prelude::*;
+
+
+#[derive(Deserialize)]
 pub struct Tweet {
-    pub created_at: String,
+    pub id: i64,
+    pub created_at: DateTime<Local>,
     pub text: String,
 }

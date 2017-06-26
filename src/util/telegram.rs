@@ -18,6 +18,7 @@ pub fn send(chat_id: i32, msg: &str) -> IronResult<reqwest::Response> {
     let params = hashmap![
                 "chat_id" => format!("{}", chat_id),
                 "text" => msg.to_owned(),
+                "parse_mode" => "Markdown".to_owned()
             ];
     let client = reqwest::Client::new().map_err(|e| {
                      IronError::new(e,

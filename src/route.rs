@@ -51,10 +51,7 @@ fn strip_identifier(msg: &str) -> String {
 }
 
 fn respond_start(chat_id: i32) -> IronResult<()> {
-    register(chat_id).map_err(|e| {
-                     IronError::new(e,
-                                    (status::InternalServerError, "Error registering chat id"))
-                 })?;
+    register(chat_id).unwrap();
     send(chat_id, "Successfully registered!")?;
     Ok(())
 }

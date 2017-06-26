@@ -8,6 +8,9 @@ use self::iron::{status, IronResult};
 use std::env;
 use std::convert::From;
 use std::num::ParseIntError;
+use std::fs::OpenOptions;
+use std::error::Error;
+use std::fmt;
 
 pub enum BotData {
     Token,
@@ -54,37 +57,51 @@ pub fn send(chat_id: i32, msg: &str) -> IronResult<reqwest::Response> {
         .map_err(|e| IronError::new(e, (status::InternalServerError, "Error sending data")))
 }
 
-pub fn broadcast(msg: &str) -> Result<(), Vec<BroadcastErr>> {
+pub fn broadcast(msg: &str) -> Result<(), BroadcastErr> {
+    for id in chat_ids()? {
+        send(id, msg)?;
+    }
+    Ok(())
+}
+
+pub fn register(chat_id: i32) -> Result<(), BroadcastErr> {
+    if chat_ids()?.iter().any(|id| *id == chat_id) {
+        return Ok(());
+    }
     let id_file = read_bot_data(&BotData::IdFile);
-    let mut errs = Vec::<BroadcastErr>::new();
+    let file = OpenOptions::new()
+        .append(true)
+        .create(true)
+        .open(&id_file)
+        .expect(&format!("Failed to open file {} in append mode", id_file));
+    let mut wtr = csv::WriterBuilder::new().has_headers(false).from_writer(file);
+
+    wtr.write_record(&[format!("{}", chat_id)])?;
+    wtr.flush().expect("Failed to flush CSV writer");
+    Ok(())
+}
+
+pub fn chat_ids() -> Result<Vec<i32>, BroadcastErr> {
+    create_ids_file_if_not_exists();
+    let id_file = read_bot_data(&BotData::IdFile);
     let mut rdr = csv::ReaderBuilder::new()
         .has_headers(false)
         .from_path(id_file)
-        .expect("error creating csv reading");
-    for id in rdr.records() {
-        match id {
-            Ok(id) => {
-                match id[0].parse::<i32>() {
-                    Ok(id) => {
-                        if let Err(e) = send(id, msg) {
-                            errs.push(BroadcastErr::from(e))
-                        }
-                    }
-                    Err(e) => errs.push(BroadcastErr::from(e)),
-                }
-            }
-            Err(e) => errs.push(BroadcastErr::from(e)),
-        };
+        .expect("Error creating csv reader. Does the id csv exist?");
+    let mut ids = Vec::new();
+    for record in rdr.records() {
+        ids.push(record?[0].parse::<i32>()?);
     }
-    if errs.is_empty() { Ok(()) } else { Err(errs) }
+    Ok(ids)
 }
 
-pub fn register(chat_id: i32) -> csv::Result<()> {
+pub fn create_ids_file_if_not_exists() {
     let id_file = read_bot_data(&BotData::IdFile);
-    let mut wtr = csv::Writer::from_path(id_file)?;
-    wtr.write_record(&[format!("{}", chat_id)])?;
-    wtr.flush()?;
-    Ok(())
+    OpenOptions::new()
+        .append(true)
+        .create(true)
+        .open(&id_file)
+        .expect(&format!("Failed to open or create file {}", id_file));
 }
 
 #[derive(Debug)]
@@ -92,6 +109,29 @@ pub enum BroadcastErr {
     Csv(csv::Error),
     Iron(IronError),
     Parse(ParseIntError),
+}
+
+impl fmt::Display for BroadcastErr {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            BroadcastErr::Csv(ref e) => e.fmt(f),
+            BroadcastErr::Iron(ref e) => e.fmt(f),
+            BroadcastErr::Parse(ref e) => e.fmt(f),
+        }
+    }
+}
+impl Error for BroadcastErr {
+    fn description(&self) -> &str {
+        "Something went wrong while doing csv stuff"
+    }
+
+    fn cause(&self) -> Option<&Error> {
+        match *self {
+            BroadcastErr::Csv(ref e) => Some(e),
+            BroadcastErr::Iron(ref e) => Some(e),
+            BroadcastErr::Parse(ref e) => Some(e),
+        }
+    }
 }
 
 impl From<csv::Error> for BroadcastErr {

@@ -16,7 +16,10 @@ pub fn send(chat_id: i32, msg: &str) -> IronResult<reqwest::Response> {
 }
 
 
-pub fn send_with_reply_markup(chat_id: i32, msg: &str, markup: Option<InlineKeyboardMarkup>) -> IronResult<reqwest::Response> {
+pub fn send_with_reply_markup(chat_id: i32,
+                              msg: &str,
+                              markup: Option<InlineKeyboardMarkup>)
+                              -> IronResult<reqwest::Response> {
     let url = format!("{}{}{}",
                       "https://api.telegram.org/bot",
                       read_env_var(&EnvVar::Token),

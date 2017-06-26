@@ -96,19 +96,17 @@ fn respond_delays(chat_id: i32) -> IronResult<()> {
     for _ in 0..3 {
         let mut row = Vec::new();
         for _ in 0..3 {
-            let count_str = format!("{}",count);
+            let count_str = format!("{}", count);
             let button = InlineKeyboardButton {
                 text: count_str.clone(),
                 switch_inline_query_current_chat: Some(count_str),
             };
             row.push(button);
-            count+=1;
+            count += 1;
         }
         buttons.push(row);
     }
-    let markup = InlineKeyboardMarkup {
-        inline_keyboard: buttons
-    };
+    let markup = InlineKeyboardMarkup { inline_keyboard: buttons };
     let msg = "How many of the last delays to you want to look up?";
     let mut s = String::new();
     send_with_reply_markup(chat_id, msg, Some(markup))?.read_to_string(&mut s).unwrap();

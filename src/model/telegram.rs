@@ -136,7 +136,7 @@ pub struct OrderInfo {
 
 #[derive(Serialize, Deserialize)]
 pub struct InlineKeyboardMarkup {
-    pub inline_keyboard: Vec<Vec<InlineKeyboardButton>>
+    pub inline_keyboard: Vec<Vec<InlineKeyboardButton>>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -144,4 +144,3 @@ pub struct InlineKeyboardButton {
     pub text: String,
     pub switch_inline_query_current_chat: Option<String>,
 }
-

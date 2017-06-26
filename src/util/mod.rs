@@ -15,6 +15,7 @@ pub enum EnvVar {
     IdFile,
     BearerToken,
     LastTweetFile,
+    TwitterAcc,
 }
 
 pub fn read_env_var(data: &EnvVar) -> String {
@@ -24,6 +25,7 @@ pub fn read_env_var(data: &EnvVar) -> String {
         EnvVar::IdFile => "TELEGRAM_BOT_CHAT_ID_FILE",
         EnvVar::BearerToken => "TWITTER_BEARER_TOKEN",
         EnvVar::LastTweetFile => "LAST_TWEET_FILE",
+        EnvVar::TwitterAcc => "TWITTER_ACC",
     };
     read_raw_env_var(env_var)
 }

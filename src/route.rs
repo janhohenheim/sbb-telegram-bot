@@ -6,6 +6,7 @@ use self::iron::{status, Request, Response, IronResult};
 
 use util::{EnvVar, read_env_var};
 use util::telegram::{register, unregister, send};
+use util::twitter;
 use model::telegram;
 
 use std::io::Read;
@@ -56,11 +57,13 @@ fn strip_identifier(msg: &str) -> String {
 fn respond_start(chat_id: i32) -> IronResult<()> {
     let new_registration = register(chat_id).unwrap();
     let msg = if new_registration {
-        "Successfully registered!"
+        let acc = read_env_var(&EnvVar::TwitterAcc);
+        let tweet = twitter::user_last_tweet(&acc).unwrap();
+        format!("Successfully registered!\nLast delay: {}", tweet)
     } else {
-        "This chat has already been registered"
+        "This chat has already been registered".to_owned()
     };
-    send(chat_id, msg)?;
+    send(chat_id, &msg)?;
     Ok(())
 }
 

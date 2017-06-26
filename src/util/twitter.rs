@@ -8,7 +8,7 @@ use model::twitter::Tweet;
 use std::io::{Read, Write};
 use std::fs::File;
 
-pub fn user_timeline(screen_name: &str, count: i32) -> Result<Vec<Tweet>, reqwest::Error> {
+pub fn user_timeline(screen_name: &str, count: u32) -> Result<Vec<Tweet>, reqwest::Error> {
     let url = Url::parse_with_params("https://api.twitter.com/1.1/statuses/user_timeline.json",
                                      &[("screen_name", screen_name),
                                        ("count", &format!("{}", count))])
@@ -27,6 +27,12 @@ pub fn user_timeline(screen_name: &str, count: i32) -> Result<Vec<Tweet>, reqwes
 
     let tweets: Vec<Tweet> = serde_json::from_str(&res).unwrap();
     Ok(tweets)
+}
+
+pub fn user_last_tweet(screen_name: &str) -> Result<Tweet, reqwest::Error> {
+    let mut tweets = user_timeline(screen_name, 1)?;
+    let tweet = tweets.swap_remove(0);
+    Ok(tweet)
 }
 
 

@@ -132,7 +132,11 @@ fn respond_num_delays(chat_id: i32, delay_count: u32) -> IronResult<()> {
     }
     let acc = read_env_var(&EnvVar::TwitterAcc);
     let tweets = twitter::user_timeline(&acc, delay_count).unwrap();
-    let mut msg = format!("Showing last {} delays:\n\n", delay_count);
+    let mut msg = if delay_count == 1 {
+        "Showing last delay:\n\n".to_owned()
+    } else {
+        format!("Showing last {} delays:\n\n", delay_count)
+    };
     for (i, tweet) in tweets.iter().enumerate() {
         msg += &format!("{}. {}\n", i + 1, tweet);
     }

@@ -58,8 +58,8 @@ pub fn unregister(chat_id: i32) -> Result<bool, BroadcastErr> {
     let mut ids = chat_ids()?;
     let pos = ids.iter().position(|&id| id == chat_id);
     if let None = pos {
-        return Ok(false)
-    } 
+        return Ok(false);
+    }
     let pos = pos.unwrap();
     ids.swap_remove(pos);
     write_chat_ids(&ids);

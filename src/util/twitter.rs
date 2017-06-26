@@ -36,8 +36,11 @@ pub fn read_last_tweet_id() -> i64 {
     let mut file = File::open(filename).unwrap();
     let mut id = String::new();
     file.read_to_string(&mut id).unwrap();
-    id.parse::<i64>().unwrap_or_else(|_| {write_last_tweet_id(0); 0}) 
-    
+    id.parse::<i64>().unwrap_or_else(|_| {
+                                         write_last_tweet_id(0);
+                                         0
+                                     })
+
 }
 
 pub fn write_last_tweet_id(id: i64) {

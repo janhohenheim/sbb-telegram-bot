@@ -21,7 +21,7 @@ fn main() {
 fn broadcast_loop() {
     let mut last_id = 0;
     loop {
-        thread::sleep(Duration::from_secs(5));
+        thread::sleep(Duration::from_secs(10));
         let tweets = user_timeline("railinfo_sbb", 1).unwrap();
         let tweet = &tweets[0];
         if tweet.id != last_id {

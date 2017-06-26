@@ -19,13 +19,12 @@ fn main() {
 }
 
 fn broadcast_loop() {
-    let mut last_id = 0;
     loop {
         thread::sleep(Duration::from_secs(10));
         let tweets = user_timeline("railinfo_sbb", 1).unwrap();
         let tweet = &tweets[0];
-        if tweet.id != last_id {
-            last_id = tweet.id;
+        if tweet.id != util::read_last_tweet_id() {
+            util::write_last_tweet_id(tweet.id);
             let mut txt = tweet.text.clone();
             if let Some(pos) = txt.find("http") {
                 txt = txt[..pos].to_owned();

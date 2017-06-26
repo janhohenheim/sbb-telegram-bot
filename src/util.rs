@@ -11,26 +11,30 @@ use std::num::ParseIntError;
 use std::fs::OpenOptions;
 use std::error::Error;
 use std::fmt;
+use std::fs::File;
+use std::io::prelude::*;
 
 pub enum EnvVar {
     Token,
     Name,
     IdFile,
     BearerToken,
+    LastTweetFile,
 }
 
-pub fn read_bot_data(data: &EnvVar) -> String {
+pub fn read_env_var(data: &EnvVar) -> String {
     let env_var = match *data {
         EnvVar::Token => "TELEGRAM_BOT_TOKEN",
         EnvVar::Name => "TELEGRAM_BOT_NAME",
         EnvVar::IdFile => "TELEGRAM_BOT_CHAT_ID_FILE",
         EnvVar::BearerToken => "TWITTER_BEARER_TOKEN",
+        EnvVar::LastTweetFile => "LAST_TWEET_FILE",
     };
-    read_env_var(env_var)
+    read_raw_env_var(env_var)
 }
 
 
-fn read_env_var(var: &str) -> String {
+fn read_raw_env_var(var: &str) -> String {
     env::var_os(var)
         .expect(&format!("{} must be specified. \
                 Did you forget to add it to your .env file?",
@@ -43,7 +47,7 @@ fn read_env_var(var: &str) -> String {
 pub fn send(chat_id: i32, msg: &str) -> IronResult<reqwest::Response> {
     let url = format!("{}{}{}",
                       "https://api.telegram.org/bot",
-                      read_bot_data(&EnvVar::Token),
+                      read_env_var(&EnvVar::Token),
                       "/sendMessage");
     let params = hashmap![
                 "chat_id" => format!("{}", chat_id),
@@ -70,7 +74,7 @@ pub fn register(chat_id: i32) -> Result<bool, BroadcastErr> {
     if chat_ids()?.iter().any(|id| *id == chat_id) {
         return Ok(false);
     }
-    let id_file = read_bot_data(&EnvVar::IdFile);
+    let id_file = read_env_var(&EnvVar::IdFile);
     let file = OpenOptions::new()
         .append(true)
         .create(true)
@@ -85,7 +89,7 @@ pub fn register(chat_id: i32) -> Result<bool, BroadcastErr> {
 
 pub fn chat_ids() -> Result<Vec<i32>, BroadcastErr> {
     create_ids_file_if_not_exists();
-    let id_file = read_bot_data(&EnvVar::IdFile);
+    let id_file = read_env_var(&EnvVar::IdFile);
     let mut rdr = csv::ReaderBuilder::new()
         .has_headers(false)
         .from_path(id_file)
@@ -98,12 +102,27 @@ pub fn chat_ids() -> Result<Vec<i32>, BroadcastErr> {
 }
 
 pub fn create_ids_file_if_not_exists() {
-    let id_file = read_bot_data(&EnvVar::IdFile);
+    let id_file = read_env_var(&EnvVar::IdFile);
     OpenOptions::new()
         .append(true)
         .create(true)
         .open(&id_file)
         .expect(&format!("Failed to open or create file {}", id_file));
+}
+
+pub fn read_last_tweet_id() -> i64 {
+    let filename = read_env_var(&EnvVar::LastTweetFile);
+    let mut file = File::open(filename).unwrap();
+    let mut id = String::new();
+    file.read_to_string(&mut id).unwrap();
+    id.parse::<i64>().unwrap()
+}
+
+pub fn write_last_tweet_id(id: i64) {
+    let filename = read_env_var(&EnvVar::LastTweetFile);
+    let mut file = File::create(filename).unwrap();
+    let content = format!("{}", id).into_bytes();
+    file.write_all(&content).unwrap();
 }
 
 #[derive(Debug)]

@@ -4,7 +4,7 @@ extern crate reqwest;
 use self::iron::prelude::*;
 use self::iron::{status, Request, Response, IronResult};
 
-use super::util::{EnvVar, read_bot_data, register, send};
+use super::util::{EnvVar, read_env_var, register, send};
 use super::model::telegram;
 
 use std::io::Read;
@@ -19,7 +19,7 @@ pub fn telegram(req: &mut Request) -> IronResult<Response> {
     if let Some(msg) = update.message {
         if let Some(txt) = msg.text {
             let is_private = msg.chat.chat_type == "private";
-            let identifier = format!("@{}", read_bot_data(&EnvVar::Name));
+            let identifier = format!("@{}", read_env_var(&EnvVar::Name));
             let has_identifier = txt.find(&identifier).is_some();
             let txt = strip_identifier(&txt);
             if is_private || has_identifier {
@@ -43,7 +43,7 @@ pub fn telegram(req: &mut Request) -> IronResult<Response> {
 
 
 fn strip_identifier(msg: &str) -> String {
-    let identifier = format!("@{}", read_bot_data(&EnvVar::Name));
+    let identifier = format!("@{}", read_env_var(&EnvVar::Name));
     if let Some(pos) = msg.find(&identifier) {
         return msg[..pos].to_owned();
     }

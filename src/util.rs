@@ -16,6 +16,7 @@ pub enum BotData {
     Token,
     Name,
     IdFile,
+    BearerToken,
 }
 
 pub fn read_bot_data(data: &BotData) -> String {
@@ -23,6 +24,7 @@ pub fn read_bot_data(data: &BotData) -> String {
         BotData::Token => "TELEGRAM_BOT_TOKEN",
         BotData::Name => "TELEGRAM_BOT_NAME",
         BotData::IdFile => "TELEGRAM_BOT_CHAT_ID_FILE",
+        BotData::BearerToken => "TWITTER_BEARER_TOKEN",
     };
     read_env_var(env_var)
 }

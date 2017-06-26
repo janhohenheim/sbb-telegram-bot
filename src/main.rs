@@ -7,6 +7,7 @@ extern crate sbb_telegram_bot;
 use dotenv::dotenv;
 use iron::prelude::*;
 use sbb_telegram_bot::{route, util};
+use sbb_telegram_bot::api::twitter::user_timeline;
 use std::thread;
 use std::time::Duration;
 
@@ -18,10 +19,14 @@ fn main() {
 }
 
 fn broadcast_loop() {
+    let mut last_id = 0;
     loop {
-        thread::sleep(Duration::from_secs(60 * 60));
-        let msg = "An SBB delay occured!\n\
-            Haha! Got you there, this is just a dummy text 😜";
-        util::broadcast(msg).unwrap();
+        thread::sleep(Duration::from_secs(5));
+        let tweets = user_timeline("railinfo_sbb", 1).unwrap();
+        let tweet = &tweets[0];
+        if tweet.id != last_id {
+            last_id = tweet.id;
+            util::broadcast(&tweet.text).unwrap();
+        }
     }
 }

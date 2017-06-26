@@ -133,3 +133,15 @@ pub struct OrderInfo {
     pub email: Option<String>,
     pub shipping_address: Option<String>,
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct InlineKeyboardMarkup {
+    pub inline_keyboard: Vec<Vec<InlineKeyboardButton>>
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct InlineKeyboardButton {
+    pub text: String,
+    pub switch_inline_query_current_chat: Option<String>,
+}
+

@@ -1,6 +1,7 @@
 extern crate iron;
 extern crate reqwest;
 extern crate csv;
+extern crate serde_json;
 
 use super::{read_env_var, EnvVar, create_file_if_not_exists};
 
@@ -8,18 +9,26 @@ use self::iron::prelude::*;
 use self::iron::{status, IronResult};
 use err::BroadcastErr;
 use std::fs::{File, OpenOptions};
-
+use model::telegram::InlineKeyboardMarkup;
 
 pub fn send(chat_id: i32, msg: &str) -> IronResult<reqwest::Response> {
+    send_with_reply_markup(chat_id, msg, None)
+}
+
+
+pub fn send_with_reply_markup(chat_id: i32, msg: &str, markup: Option<InlineKeyboardMarkup>) -> IronResult<reqwest::Response> {
     let url = format!("{}{}{}",
                       "https://api.telegram.org/bot",
                       read_env_var(&EnvVar::Token),
                       "/sendMessage");
-    let params = hashmap![
+    let mut params = hashmap![
                 "chat_id" => format!("{}", chat_id),
                 "text" => msg.to_owned(),
-                "parse_mode" => "Markdown".to_owned()
+                "parse_mode" => "Markdown".to_owned(),
             ];
+    if let Some(markup) = markup {
+        params.insert("reply_markup", serde_json::to_string(&markup).unwrap());
+    }
     let client = reqwest::Client::new().map_err(|e| {
                      IronError::new(e,
                                     (status::InternalServerError, "Error setting up HTTP client"))

@@ -14,7 +14,7 @@ impl Display for Tweet {
         if let Some(pos) = txt.find("Unterbruch") {
             txt.insert_str(pos, "🚫 ");
         }
-        if let Some(pos) = txt.find(":") {
+        if let Some(pos) = txt.find(':') {
             txt.insert(0, '*');
             txt.insert(pos + 1, '*');
         }

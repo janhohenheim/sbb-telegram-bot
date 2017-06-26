@@ -5,7 +5,7 @@ use self::iron::prelude::*;
 use self::iron::{status, Request, Response, IronResult};
 
 use util::{EnvVar, read_env_var};
-use util::telegram::{register, unregister, send};
+use util::telegram::{register, unregister, send, send_with_reply_markup};
 use util::twitter;
 use model::telegram;
 
@@ -89,7 +89,29 @@ fn respond_unsubscribe(chat_id: i32) -> IronResult<()> {
     Ok(())
 }
 
-fn respond_delays(_: i32) -> IronResult<()> {
+fn respond_delays(chat_id: i32) -> IronResult<()> {
+    use model::telegram::{InlineKeyboardMarkup, InlineKeyboardButton};
+    let mut buttons = Vec::new();
+    let mut count = 1;
+    for _ in 0..3 {
+        let mut row = Vec::new();
+        for _ in 0..3 {
+            let count_str = format!("{}",count);
+            let button = InlineKeyboardButton {
+                text: count_str.clone(),
+                switch_inline_query_current_chat: Some(count_str),
+            };
+            row.push(button);
+            count+=1;
+        }
+        buttons.push(row);
+    }
+    let markup = InlineKeyboardMarkup {
+        inline_keyboard: buttons
+    };
+    let msg = "How many of the last delays to you want to look up?";
+    let mut s = String::new();
+    send_with_reply_markup(chat_id, msg, Some(markup))?.read_to_string(&mut s).unwrap();
     Ok(())
 }
 

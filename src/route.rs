@@ -31,8 +31,10 @@ pub fn telegram(req: &mut Request) -> IronResult<Response> {
                     "/help" => respond_help(id),
                     "/unsubscribe" => respond_unsubscribe(id),
                     "/delays" => respond_delays(id),
-                    _ => {
-                        if is_private {
+                    txt => {
+                        if let Ok(num) = txt.parse::<u32>() {
+                            respond_num_delays(id, num)
+                        } else if is_private {
                             respond_unknown(id)
                         } else {
                             Ok(())
@@ -48,10 +50,13 @@ pub fn telegram(req: &mut Request) -> IronResult<Response> {
 
 fn strip_identifier(msg: &str) -> String {
     let identifier = format!("@{}", read_env_var(&EnvVar::Name));
-    if let Some(pos) = msg.find(&identifier) {
-        return msg[..pos].to_owned();
-    }
-    msg.to_owned()
+    let msg = if let Some(pos) = msg.find(&identifier) {
+        let end = pos + identifier.len();
+        msg[..pos].to_owned() + &msg[end..]
+    } else {
+        msg.to_owned()
+    };
+    msg.trim().to_owned()
 }
 
 fn respond_start(chat_id: i32) -> IronResult<()> {
@@ -72,6 +77,7 @@ fn respond_help(chat_id: i32) -> IronResult<()> {
          "Available commands:\n\
         /start: Subscribes this chat to be notified of SBB delays\n\
         /unsubscribe - Unsubscribes this chat from the delay notifications\n\
+        /delays - Shows the last n delays.\n\
         /help: Shows this window")?;
     Ok(())
 }
@@ -110,6 +116,27 @@ fn respond_delays(chat_id: i32) -> IronResult<()> {
     let msg = "How many of the last delays to you want to look up?";
     let mut s = String::new();
     send_with_reply_markup(chat_id, msg, Some(markup))?.read_to_string(&mut s).unwrap();
+    Ok(())
+}
+
+fn respond_num_delays(chat_id: i32, delay_count: u32) -> IronResult<()> {
+    const MIN: u32 = 1;
+    const MAX: u32 = 9;
+    if delay_count < MIN || delay_count > MAX {
+        let msg = format!("Invalid number of delays selected, \
+            please enter a number between {} and {}.",
+                          MIN,
+                          MAX);
+        send(chat_id, &msg)?;
+        return Ok(());
+    }
+    let acc = read_env_var(&EnvVar::TwitterAcc);
+    let tweets = twitter::user_timeline(&acc, delay_count).unwrap();
+    let mut msg = format!("Showing last {} delays:\n\n", delay_count);
+    for (i, tweet) in tweets.iter().enumerate() {
+        msg += &format!("{}. {}\n", i + 1, tweet);
+    }
+    send(chat_id, &msg)?;
     Ok(())
 }
 

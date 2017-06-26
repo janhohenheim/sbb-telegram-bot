@@ -4,8 +4,9 @@ extern crate reqwest;
 use self::iron::prelude::*;
 use self::iron::{status, Request, Response, IronResult};
 
-use super::util::{EnvVar, read_env_var, register, send};
-use super::model::telegram;
+use util::{EnvVar, read_env_var};
+use util::telegram::{register, send};
+use model::telegram;
 
 use std::io::Read;
 

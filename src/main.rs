@@ -6,8 +6,8 @@ extern crate sbb_telegram_bot;
 
 use dotenv::dotenv;
 use iron::prelude::*;
-use sbb_telegram_bot::{route, util};
-use sbb_telegram_bot::api::twitter::user_timeline;
+use sbb_telegram_bot::route;
+use sbb_telegram_bot::util::{telegram, twitter};
 use std::thread;
 use std::time::Duration;
 
@@ -21,15 +21,15 @@ fn main() {
 fn broadcast_loop() {
     loop {
         thread::sleep(Duration::from_secs(10));
-        let tweets = user_timeline("SBB_Delay_Bot", 1).unwrap();
+        let tweets = twitter::user_timeline("SBB_Delay_Bot", 1).unwrap();
         let tweet = &tweets[0];
-        if tweet.id != util::read_last_tweet_id() {
-            util::write_last_tweet_id(tweet.id);
+        if tweet.id != twitter::read_last_tweet_id() {
+            twitter::write_last_tweet_id(tweet.id);
             let mut txt = tweet.text.clone();
             if let Some(pos) = txt.find("http") {
                 txt = txt[..pos].to_owned();
             }
-            util::broadcast(&txt).unwrap();
+            telegram::broadcast(&txt).unwrap();
         }
     }
 }

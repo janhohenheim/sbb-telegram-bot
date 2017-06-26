@@ -1,11 +1,12 @@
 extern crate reqwest;
 extern crate serde_json;
 
+use super::{read_env_var, EnvVar, create_file_if_not_exists};
 use self::reqwest::Url;
 
 use model::twitter::Tweet;
-use util::{EnvVar, read_env_var};
-use std::io::Read;
+use std::io::{Read, Write};
+use std::fs::File;
 
 pub fn user_timeline(screen_name: &str, count: i32) -> Result<Vec<Tweet>, reqwest::Error> {
     let url = Url::parse_with_params("https://api.twitter.com/1.1/statuses/user_timeline.json",
@@ -26,4 +27,21 @@ pub fn user_timeline(screen_name: &str, count: i32) -> Result<Vec<Tweet>, reqwes
 
     let tweets: Vec<Tweet> = serde_json::from_str(&res).unwrap();
     Ok(tweets)
+}
+
+
+pub fn read_last_tweet_id() -> i64 {
+    let filename = read_env_var(&EnvVar::LastTweetFile);
+    create_file_if_not_exists(&filename);
+    let mut file = File::open(filename).unwrap();
+    let mut id = String::new();
+    file.read_to_string(&mut id).unwrap();
+    id.parse::<i64>().unwrap()
+}
+
+pub fn write_last_tweet_id(id: i64) {
+    let filename = read_env_var(&EnvVar::LastTweetFile);
+    let mut file = File::create(filename).unwrap();
+    let content = format!("{}", id).into_bytes();
+    file.write_all(&content).unwrap();
 }

@@ -6,4 +6,4 @@ extern crate maplit;
 pub mod model;
 pub mod route;
 pub mod util;
-pub mod api;
+pub mod err;

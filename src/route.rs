@@ -59,7 +59,7 @@ fn respond_start(chat_id: i32) -> IronResult<()> {
     let msg = if new_registration {
         let acc = read_env_var(&EnvVar::TwitterAcc);
         let tweet = twitter::user_last_tweet(&acc).unwrap();
-        format!("Successfully registered!\nLast delay: {}", tweet)
+        format!("Successfully registered!\nLast delay:\n\n{}", tweet)
     } else {
         "This chat has already been registered".to_owned()
     };

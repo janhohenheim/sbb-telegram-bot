@@ -4,7 +4,7 @@ extern crate serde_json;
 use self::reqwest::Url;
 
 use model::twitter::Tweet;
-use util::{BotData, read_bot_data};
+use util::{EnvVar, read_bot_data};
 use std::io::Read;
 
 pub fn user_timeline(screen_name: &str, count: i32) -> Result<Vec<Tweet>, reqwest::Error> {
@@ -12,7 +12,7 @@ pub fn user_timeline(screen_name: &str, count: i32) -> Result<Vec<Tweet>, reqwes
                                      &[("screen_name", screen_name),
                                        ("count", &format!("{}", count))])
             .unwrap();
-    let auth = format!("Bearer {}", read_bot_data(&BotData::BearerToken));
+    let auth = format!("Bearer {}", read_bot_data(&EnvVar::BearerToken));
     let mut auth_header = reqwest::header::Headers::new();
     auth_header.set_raw("Authorization", vec![auth.into_bytes()]);
 

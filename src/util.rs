@@ -12,19 +12,19 @@ use std::fs::OpenOptions;
 use std::error::Error;
 use std::fmt;
 
-pub enum BotData {
+pub enum EnvVar {
     Token,
     Name,
     IdFile,
     BearerToken,
 }
 
-pub fn read_bot_data(data: &BotData) -> String {
+pub fn read_bot_data(data: &EnvVar) -> String {
     let env_var = match *data {
-        BotData::Token => "TELEGRAM_BOT_TOKEN",
-        BotData::Name => "TELEGRAM_BOT_NAME",
-        BotData::IdFile => "TELEGRAM_BOT_CHAT_ID_FILE",
-        BotData::BearerToken => "TWITTER_BEARER_TOKEN",
+        EnvVar::Token => "TELEGRAM_BOT_TOKEN",
+        EnvVar::Name => "TELEGRAM_BOT_NAME",
+        EnvVar::IdFile => "TELEGRAM_BOT_CHAT_ID_FILE",
+        EnvVar::BearerToken => "TWITTER_BEARER_TOKEN",
     };
     read_env_var(env_var)
 }
@@ -43,7 +43,7 @@ fn read_env_var(var: &str) -> String {
 pub fn send(chat_id: i32, msg: &str) -> IronResult<reqwest::Response> {
     let url = format!("{}{}{}",
                       "https://api.telegram.org/bot",
-                      read_bot_data(&BotData::Token),
+                      read_bot_data(&EnvVar::Token),
                       "/sendMessage");
     let params = hashmap![
                 "chat_id" => format!("{}", chat_id),
@@ -66,11 +66,11 @@ pub fn broadcast(msg: &str) -> Result<(), BroadcastErr> {
     Ok(())
 }
 
-pub fn register(chat_id: i32) -> Result<(), BroadcastErr> {
+pub fn register(chat_id: i32) -> Result<bool, BroadcastErr> {
     if chat_ids()?.iter().any(|id| *id == chat_id) {
-        return Ok(());
+        return Ok(false);
     }
-    let id_file = read_bot_data(&BotData::IdFile);
+    let id_file = read_bot_data(&EnvVar::IdFile);
     let file = OpenOptions::new()
         .append(true)
         .create(true)
@@ -80,12 +80,12 @@ pub fn register(chat_id: i32) -> Result<(), BroadcastErr> {
 
     wtr.write_record(&[format!("{}", chat_id)])?;
     wtr.flush().expect("Failed to flush CSV writer");
-    Ok(())
+    Ok(true)
 }
 
 pub fn chat_ids() -> Result<Vec<i32>, BroadcastErr> {
     create_ids_file_if_not_exists();
-    let id_file = read_bot_data(&BotData::IdFile);
+    let id_file = read_bot_data(&EnvVar::IdFile);
     let mut rdr = csv::ReaderBuilder::new()
         .has_headers(false)
         .from_path(id_file)
@@ -98,7 +98,7 @@ pub fn chat_ids() -> Result<Vec<i32>, BroadcastErr> {
 }
 
 pub fn create_ids_file_if_not_exists() {
-    let id_file = read_bot_data(&BotData::IdFile);
+    let id_file = read_bot_data(&EnvVar::IdFile);
     OpenOptions::new()
         .append(true)
         .create(true)

@@ -7,7 +7,8 @@ use super::{read_env_var, EnvVar, create_file_if_not_exists};
 use self::iron::prelude::*;
 use self::iron::{status, IronResult};
 use err::BroadcastErr;
-use std::fs::OpenOptions;
+use std::io::Write;
+use std::fs::{File, OpenOptions};
 
 
 pub fn send(chat_id: i32, msg: &str) -> IronResult<reqwest::Response> {
@@ -53,6 +54,27 @@ pub fn register(chat_id: i32) -> Result<bool, BroadcastErr> {
     Ok(true)
 }
 
+pub fn unregister(chat_id: i32) -> Result<bool, BroadcastErr> {
+    let mut ids = chat_ids()?;
+    let pos = ids.iter().position(|&id| id == chat_id);
+    if let None = pos {
+        return Ok(false)
+    } 
+    let pos = pos.unwrap();
+    ids.swap_remove(pos);
+    write_chat_ids(&ids);
+    Ok(true)
+}
+
+fn write_chat_ids(ids: &Vec<i32>) {
+    let filename = read_env_var(&EnvVar::IdFile);
+    let mut file = File::create(filename).unwrap();
+    let mut content = String::new();
+    for id in ids {
+        content += &format!("{}", id);
+    }
+    file.write_all(&content.into_bytes()).unwrap();
+}
 
 pub fn chat_ids() -> Result<Vec<i32>, BroadcastErr> {
     let id_file = read_env_var(&EnvVar::IdFile);

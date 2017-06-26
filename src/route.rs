@@ -5,7 +5,7 @@ use self::iron::prelude::*;
 use self::iron::{status, Request, Response, IronResult};
 
 use util::{EnvVar, read_env_var};
-use util::telegram::{register, send};
+use util::telegram::{register, unregister, send};
 use model::telegram;
 
 use std::io::Read;
@@ -28,6 +28,8 @@ pub fn telegram(req: &mut Request) -> IronResult<Response> {
                 match txt.as_str() {
                     "/start" => respond_start(id),
                     "/help" => respond_help(id),
+                    "/unsubscribe" => respond_unsubscribe(id),
+                    "/delays" => respond_delays(id),
                     _ => {
                         if is_private {
                             respond_unknown(id)
@@ -67,6 +69,23 @@ fn respond_help(chat_id: i32) -> IronResult<()> {
          "Available commands:\n\
         /start: Subscribes this chat to be notified of SBB delays\n\
         /help: Shows this window")?;
+    Ok(())
+}
+
+fn respond_unsubscribe(chat_id: i32) -> IronResult<()> {
+    let unsubscribed = unregister(chat_id).unwrap();
+    let msg = if unsubscribed {
+        "Successfully unsubscribed from the delay notifications.\n\
+        Use /start to subscribe again"
+    } else {
+        "This chat was not subscribed to be notified of delays in the first place, silly!\n\
+        Use /start if you want to subscribe"
+    };
+    send(chat_id, msg)?;
+    Ok(())
+}
+
+fn respond_delays(chat_id: i32) -> IronResult<()> {
     Ok(())
 }
 

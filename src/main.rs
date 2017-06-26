@@ -26,7 +26,11 @@ fn broadcast_loop() {
         let tweet = &tweets[0];
         if tweet.id != last_id {
             last_id = tweet.id;
-            util::broadcast(&tweet.text).unwrap();
+            let mut txt = tweet.text.clone();
+            if let Some(pos) = txt.find("http") {
+                txt = txt[..pos].to_owned();
+            }
+            util::broadcast(&txt).unwrap();
         }
     }
 }

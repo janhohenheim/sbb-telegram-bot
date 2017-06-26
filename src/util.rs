@@ -103,15 +103,20 @@ pub fn chat_ids() -> Result<Vec<i32>, BroadcastErr> {
 
 pub fn create_ids_file_if_not_exists() {
     let id_file = read_env_var(&EnvVar::IdFile);
+    create_file_if_not_exists(&id_file);
+}
+
+fn create_file_if_not_exists(name: &str) {
     OpenOptions::new()
         .append(true)
         .create(true)
-        .open(&id_file)
-        .expect(&format!("Failed to open or create file {}", id_file));
+        .open(&name)
+        .expect(&format!("Failed to open or create file {}", name));
 }
 
 pub fn read_last_tweet_id() -> i64 {
     let filename = read_env_var(&EnvVar::LastTweetFile);
+    create_file_if_not_exists(&filename);
     let mut file = File::open(filename).unwrap();
     let mut id = String::new();
     file.read_to_string(&mut id).unwrap();

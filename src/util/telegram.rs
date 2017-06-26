@@ -7,7 +7,6 @@ use super::{read_env_var, EnvVar, create_file_if_not_exists};
 use self::iron::prelude::*;
 use self::iron::{status, IronResult};
 use err::BroadcastErr;
-use std::io::Write;
 use std::fs::{File, OpenOptions};
 
 
@@ -57,7 +56,7 @@ pub fn register(chat_id: i32) -> Result<bool, BroadcastErr> {
 pub fn unregister(chat_id: i32) -> Result<bool, BroadcastErr> {
     let mut ids = chat_ids()?;
     let pos = ids.iter().position(|&id| id == chat_id);
-    if let None = pos {
+    if pos.is_none() {
         return Ok(false);
     }
     let pos = pos.unwrap();
@@ -66,14 +65,14 @@ pub fn unregister(chat_id: i32) -> Result<bool, BroadcastErr> {
     Ok(true)
 }
 
-fn write_chat_ids(ids: &Vec<i32>) {
+fn write_chat_ids(ids: &[i32]) {
     let filename = read_env_var(&EnvVar::IdFile);
-    let mut file = File::create(filename).unwrap();
-    let mut content = String::new();
+    let file = File::create(filename).unwrap();
+    let mut wtr = csv::WriterBuilder::new().has_headers(false).from_writer(file);
     for id in ids {
-        content += &format!("{}", id);
+        wtr.write_record(&[format!("{}", id)]).unwrap();
     }
-    file.write_all(&content.into_bytes()).unwrap();
+    wtr.flush().expect("Failed to flush CSV writer");
 }
 
 pub fn chat_ids() -> Result<Vec<i32>, BroadcastErr> {

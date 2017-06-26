@@ -86,7 +86,7 @@ fn respond_unsubscribe(chat_id: i32) -> IronResult<()> {
     Ok(())
 }
 
-fn respond_delays(chat_id: i32) -> IronResult<()> {
+fn respond_delays(_: i32) -> IronResult<()> {
     Ok(())
 }
 

@@ -74,11 +74,11 @@ fn respond_start(chat_id: i32) -> IronResult<()> {
 
 fn respond_help(chat_id: i32) -> IronResult<()> {
     send(chat_id,
-         "Available commands:\n\
-        /start: Subscribes this chat to be notified of SBB delays\n\
+         "Available commands:\n\n\
+        /start - Subscribes this chat to be notified of SBB delays\n\
         /unsubscribe - Unsubscribes this chat from the delay notifications\n\
-        /delays - Shows the last n delays.\n\
-        /help: Shows this window")?;
+        /delays - Shows the last `n` delays\n\
+        /help - Shows this window")?;
     Ok(())
 }
 

@@ -25,8 +25,9 @@ fn broadcast_loop() {
         let tweet = twitter::user_last_tweet(&acc).unwrap();
         if tweet.id != twitter::read_last_tweet_id() {
             twitter::write_last_tweet_id(tweet.id);
+            let markup = telegram::get_info_markup(&tweet.text);
             let txt = format!("{}", tweet);
-            telegram::broadcast(&txt).unwrap();
+            telegram::broadcast_with_markup(&txt, &markup).unwrap();
         }
     }
 }

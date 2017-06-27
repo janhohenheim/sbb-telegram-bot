@@ -139,8 +139,13 @@ pub struct InlineKeyboardMarkup {
     pub inline_keyboard: Vec<Vec<InlineKeyboardButton>>,
 }
 
+
 #[derive(Serialize,Deserialize, Debug)]
-pub struct InlineKeyboardButton {
-    pub text: String,
-    pub switch_inline_query_current_chat: Option<String>,
+#[serde(untagged)]
+pub enum InlineKeyboardButton {
+    Url { text: String, url: String },
+    SwitchInlineQueryCurrentChat {
+        text: String,
+        switch_inline_query_current_chat: String,
+    },
 }

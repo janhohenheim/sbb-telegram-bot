@@ -30,6 +30,19 @@ pub fn read_env_var(data: &EnvVar) -> String {
     read_raw_env_var(env_var)
 }
 
+pub fn get_link(msg: &str) -> Option<String> {
+    if let Some(pos) = msg.find("http") {
+        let end = pos + find_whitespace(&msg[pos..]);
+        let link = msg[pos..end].to_owned();
+        Some(link)
+    } else {
+        None
+    }
+}
+
+pub fn find_whitespace(msg: &str) -> usize {
+    msg.find(char::is_whitespace).unwrap_or_else(|| msg.len())
+}
 
 fn read_raw_env_var(var: &str) -> String {
     env::var_os(var)
@@ -39,9 +52,6 @@ fn read_raw_env_var(var: &str) -> String {
         .into_string()
         .expect(&format!("{} does not contain a valid UTF8 string", var))
 }
-
-
-
 
 fn create_file_if_not_exists(name: &str) {
     OpenOptions::new()

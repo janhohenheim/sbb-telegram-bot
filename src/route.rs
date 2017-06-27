@@ -5,7 +5,7 @@ use self::iron::prelude::*;
 use self::iron::{status, Request, Response, IronResult};
 
 use util::{EnvVar, read_env_var};
-use util::telegram::{register, unregister, send, send_with_reply_markup};
+use util::telegram::{register, unregister, send, send_with_markup, get_info_markup};
 use util::twitter;
 use model::telegram;
 
@@ -18,7 +18,6 @@ pub fn telegram(req: &mut Request) -> IronResult<Response> {
         .read_to_string(&mut body)
         .map_err(|e| IronError::new(e, (status::BadRequest, "Error reading request")))?;
     let update: telegram::Update = serde_json::from_str(&body).unwrap();
-    println!("{:?}", update);
     if let Some(msg) = update.message {
         if let Some(txt) = msg.text {
             let is_private = msg.chat.chat_type == "private";
@@ -62,14 +61,16 @@ fn strip_identifier(msg: &str) -> String {
 
 fn respond_start(chat_id: i64) -> IronResult<()> {
     let new_registration = register(chat_id).unwrap();
-    let msg = if new_registration {
+    let (msg, markup) = if new_registration {
         let acc = read_env_var(&EnvVar::TwitterAcc);
         let tweet = twitter::user_last_tweet(&acc).unwrap();
-        format!("Successfully registered!\nLast delay:\n\n{}", tweet)
+        let msg = format!("Successfully registered!\nLast delay:\n\n{}", tweet);
+        let markup = get_info_markup(&tweet.text);
+        (msg, markup)
     } else {
-        "This chat has already been registered".to_owned()
+        ("This chat has already been registered".to_owned(), None)
     };
-    send(chat_id, &msg)?;
+    send_with_markup(chat_id, &msg, &markup)?;
     Ok(())
 }
 
@@ -104,9 +105,9 @@ fn respond_delays(chat_id: i64) -> IronResult<()> {
         let mut row = Vec::new();
         for _ in 0..3 {
             let count_str = format!("{}", count);
-            let button = InlineKeyboardButton {
+            let button = InlineKeyboardButton::SwitchInlineQueryCurrentChat {
                 text: count_str.clone(),
-                switch_inline_query_current_chat: Some(count_str),
+                switch_inline_query_current_chat: count_str,
             };
             row.push(button);
             count += 1;
@@ -116,7 +117,7 @@ fn respond_delays(chat_id: i64) -> IronResult<()> {
     let markup = InlineKeyboardMarkup { inline_keyboard: buttons };
     let msg = "How many of the last delays to you want to look up?";
     let mut s = String::new();
-    send_with_reply_markup(chat_id, msg, Some(markup))?.read_to_string(&mut s).unwrap();
+    send_with_markup(chat_id, msg, &Some(markup))?.read_to_string(&mut s).unwrap();
     Ok(())
 }
 
@@ -141,7 +142,8 @@ fn respond_num_delays(chat_id: i64, delay_count: u32) -> IronResult<()> {
     for (i, tweet) in tweets.iter().enumerate() {
         msg += &format!("{}. {}\n", i + 1, tweet);
     }
-    send(chat_id, &msg)?;
+    let markup = get_info_markup(&tweets[0].text);
+    send_with_markup(chat_id, &msg, &markup)?;
     Ok(())
 }
 

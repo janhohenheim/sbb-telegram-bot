@@ -3,22 +3,22 @@ extern crate reqwest;
 extern crate csv;
 extern crate serde_json;
 
-use super::{read_env_var, EnvVar, create_file_if_not_exists};
+use super::{get_link, read_env_var, EnvVar, create_file_if_not_exists};
 
 use self::iron::prelude::*;
 use self::iron::{status, IronResult};
 use err::BroadcastErr;
 use std::fs::{File, OpenOptions};
-use model::telegram::InlineKeyboardMarkup;
+use model::telegram::{InlineKeyboardMarkup, InlineKeyboardButton};
 
 pub fn send(chat_id: i64, msg: &str) -> IronResult<reqwest::Response> {
-    send_with_reply_markup(chat_id, msg, None)
+    send_with_markup(chat_id, msg, &None)
 }
 
 
-pub fn send_with_reply_markup(chat_id: i64,
+pub fn send_with_markup(chat_id: i64,
                               msg: &str,
-                              markup: Option<InlineKeyboardMarkup>)
+                              markup: &Option<InlineKeyboardMarkup>)
                               -> IronResult<reqwest::Response> {
     let url = format!("{}{}{}",
                       "https://api.telegram.org/bot",
@@ -29,7 +29,7 @@ pub fn send_with_reply_markup(chat_id: i64,
                 "text" => msg.to_owned(),
                 "parse_mode" => "Markdown".to_owned(),
             ];
-    if let Some(markup) = markup {
+    if let Some(ref markup) = *markup {
         params.insert("reply_markup", serde_json::to_string(&markup).unwrap());
     }
     let client = reqwest::Client::new().map_err(|e| {
@@ -42,11 +42,30 @@ pub fn send_with_reply_markup(chat_id: i64,
         .map_err(|e| IronError::new(e, (status::InternalServerError, "Error sending data")))
 }
 
-pub fn broadcast(msg: &str) -> Result<(), BroadcastErr> {
+pub fn broadcast_with_markup(msg: &str,
+                             markup: &Option<InlineKeyboardMarkup>)
+                             -> Result<(), BroadcastErr> {
     for id in chat_ids()? {
-        send(id, msg)?;
+        send_with_markup(id, msg, markup)?;
     }
     Ok(())
+}
+
+pub fn broadcast(msg: &str) -> Result<(), BroadcastErr> {
+    broadcast_with_markup(msg, &None)
+}
+
+pub fn get_info_markup(msg: &str) -> Option<InlineKeyboardMarkup> {
+    if let Some(link) = get_link(msg) {
+        let button = InlineKeyboardButton::Url {
+            text: "info".to_owned(),
+            url: link,
+        };
+        let markup = InlineKeyboardMarkup { inline_keyboard: vec![vec![button]] };
+        Some(markup)
+    } else {
+        None
+    }
 }
 
 pub fn register(chat_id: i64) -> Result<bool, BroadcastErr> {

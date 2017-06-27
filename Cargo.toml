@@ -1,6 +1,6 @@
 [package]
 name = "sbb-telegram-bot"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["Jan Nils Ferner <jn_ferner@hotmail.de>", "Lukas Hunziker <lucuhu@gmail.com>"]
 
 [dependencies]

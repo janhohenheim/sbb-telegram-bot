@@ -11,12 +11,12 @@ use err::BroadcastErr;
 use std::fs::{File, OpenOptions};
 use model::telegram::InlineKeyboardMarkup;
 
-pub fn send(chat_id: i32, msg: &str) -> IronResult<reqwest::Response> {
+pub fn send(chat_id: i64, msg: &str) -> IronResult<reqwest::Response> {
     send_with_reply_markup(chat_id, msg, None)
 }
 
 
-pub fn send_with_reply_markup(chat_id: i32,
+pub fn send_with_reply_markup(chat_id: i64,
                               msg: &str,
                               markup: Option<InlineKeyboardMarkup>)
                               -> IronResult<reqwest::Response> {
@@ -49,7 +49,7 @@ pub fn broadcast(msg: &str) -> Result<(), BroadcastErr> {
     Ok(())
 }
 
-pub fn register(chat_id: i32) -> Result<bool, BroadcastErr> {
+pub fn register(chat_id: i64) -> Result<bool, BroadcastErr> {
     if chat_ids()?.iter().any(|id| *id == chat_id) {
         return Ok(false);
     }
@@ -66,7 +66,7 @@ pub fn register(chat_id: i32) -> Result<bool, BroadcastErr> {
     Ok(true)
 }
 
-pub fn unregister(chat_id: i32) -> Result<bool, BroadcastErr> {
+pub fn unregister(chat_id: i64) -> Result<bool, BroadcastErr> {
     let mut ids = chat_ids()?;
     let pos = ids.iter().position(|&id| id == chat_id);
     if pos.is_none() {
@@ -78,7 +78,7 @@ pub fn unregister(chat_id: i32) -> Result<bool, BroadcastErr> {
     Ok(true)
 }
 
-fn write_chat_ids(ids: &[i32]) {
+fn write_chat_ids(ids: &[i64]) {
     let filename = read_env_var(&EnvVar::IdFile);
     let file = File::create(filename).unwrap();
     let mut wtr = csv::WriterBuilder::new().has_headers(false).from_writer(file);
@@ -88,7 +88,7 @@ fn write_chat_ids(ids: &[i32]) {
     wtr.flush().expect("Failed to flush CSV writer");
 }
 
-pub fn chat_ids() -> Result<Vec<i32>, BroadcastErr> {
+pub fn chat_ids() -> Result<Vec<i64>, BroadcastErr> {
     let id_file = read_env_var(&EnvVar::IdFile);
     create_file_if_not_exists(&id_file);
     let mut rdr = csv::ReaderBuilder::new()
@@ -97,7 +97,7 @@ pub fn chat_ids() -> Result<Vec<i32>, BroadcastErr> {
         .expect("Error creating csv reader. Does the id csv exist?");
     let mut ids = Vec::new();
     for record in rdr.records() {
-        ids.push(record?[0].parse::<i32>()?);
+        ids.push(record?[0].parse::<i64>()?);
     }
     Ok(ids)
 }

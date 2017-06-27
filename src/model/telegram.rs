@@ -1,7 +1,7 @@
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Update {
-    pub update_id: i32,
+    pub update_id: i64,
     pub message: Option<Message>,
     pub edited_message: Option<Message>,
     pub channel_post: Option<Message>,
@@ -13,9 +13,9 @@ pub struct Update {
     pub pre_checkout_query: Option<PreCheckoutQuery>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Message {
-    pub message_id: i32,
+    pub message_id: i64,
     pub from: Option<User>,
     pub date: i32,
     pub chat: Chat,
@@ -32,25 +32,25 @@ pub struct Message {
     pub delete_chat_photo: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct InlineQuery {
-    pub update_id: i32,
+    pub update_id: i64,
     pub from: User,
     pub location: Option<Location>,
     pub query: String,
     pub offset: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct ChosenInlineResult {
-    pub update_id: i32,
+    pub update_id: i64,
     pub from: User,
     pub location: Option<Location>,
     pub inline_message_id: Option<String>,
     pub query: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize,Deserialize, Debug)]
 pub struct CallbackQuery {
     pub result: i32,
     pub from: User,
@@ -61,7 +61,7 @@ pub struct CallbackQuery {
     pub game_short_name: Option<String>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize,Deserialize, Debug)]
 pub struct ShippingQuery {
     pub shipping_query_id: String,
     pub ok: bool,
@@ -69,7 +69,7 @@ pub struct ShippingQuery {
     pub error_message: Option<String>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize,Deserialize, Debug)]
 pub struct ShippingOption {
     pub id: String,
     pub from: User,
@@ -77,7 +77,7 @@ pub struct ShippingOption {
     pub shipping_address: ShippingAddress,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize,Deserialize, Debug)]
 pub struct ShippingAddress {
     pub country_code: String,
     pub state: String,
@@ -87,7 +87,7 @@ pub struct ShippingAddress {
     pub post_code: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize,Deserialize, Debug)]
 pub struct PreCheckoutQuery {
     pub id: String,
     pub from: User,
@@ -99,18 +99,18 @@ pub struct PreCheckoutQuery {
 }
 
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize,Deserialize, Debug)]
 pub struct User {
-    pub id: i32,
+    pub id: i64,
     pub first_name: Option<String>,
     pub last_name: Option<String>,
     pub username: Option<String>,
     pub language_code: Option<String>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize,Deserialize, Debug)]
 pub struct Chat {
-    pub id: i32,
+    pub id: i64,
     #[serde(rename = "type")]
     pub chat_type: String,
     pub title: Option<String>,
@@ -120,13 +120,13 @@ pub struct Chat {
     pub all_members_are_administrators: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize,Deserialize, Debug)]
 pub struct Location {
     pub longitude: f64,
     pub latitude: f64,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize,Deserialize, Debug)]
 pub struct OrderInfo {
     pub name: Option<String>,
     pub phone_number: Option<String>,
@@ -134,12 +134,12 @@ pub struct OrderInfo {
     pub shipping_address: Option<String>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize,Deserialize, Debug)]
 pub struct InlineKeyboardMarkup {
     pub inline_keyboard: Vec<Vec<InlineKeyboardButton>>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize,Deserialize, Debug)]
 pub struct InlineKeyboardButton {
     pub text: String,
     pub switch_inline_query_current_chat: Option<String>,

@@ -18,6 +18,7 @@ pub fn telegram(req: &mut Request) -> IronResult<Response> {
         .read_to_string(&mut body)
         .map_err(|e| IronError::new(e, (status::BadRequest, "Error reading request")))?;
     let update: telegram::Update = serde_json::from_str(&body).unwrap();
+    println!("{:?}", update);
     if let Some(msg) = update.message {
         if let Some(txt) = msg.text {
             let is_private = msg.chat.chat_type == "private";
@@ -59,7 +60,7 @@ fn strip_identifier(msg: &str) -> String {
     msg.trim().to_owned()
 }
 
-fn respond_start(chat_id: i32) -> IronResult<()> {
+fn respond_start(chat_id: i64) -> IronResult<()> {
     let new_registration = register(chat_id).unwrap();
     let msg = if new_registration {
         let acc = read_env_var(&EnvVar::TwitterAcc);
@@ -72,7 +73,7 @@ fn respond_start(chat_id: i32) -> IronResult<()> {
     Ok(())
 }
 
-fn respond_help(chat_id: i32) -> IronResult<()> {
+fn respond_help(chat_id: i64) -> IronResult<()> {
     send(chat_id,
          "Available commands:\n\n\
         /start - Subscribes this chat to be notified of SBB delays\n\
@@ -82,7 +83,7 @@ fn respond_help(chat_id: i32) -> IronResult<()> {
     Ok(())
 }
 
-fn respond_unsubscribe(chat_id: i32) -> IronResult<()> {
+fn respond_unsubscribe(chat_id: i64) -> IronResult<()> {
     let unsubscribed = unregister(chat_id).unwrap();
     let msg = if unsubscribed {
         "Successfully unsubscribed from the delay notifications.\n\
@@ -95,7 +96,7 @@ fn respond_unsubscribe(chat_id: i32) -> IronResult<()> {
     Ok(())
 }
 
-fn respond_delays(chat_id: i32) -> IronResult<()> {
+fn respond_delays(chat_id: i64) -> IronResult<()> {
     use model::telegram::{InlineKeyboardMarkup, InlineKeyboardButton};
     let mut buttons = Vec::new();
     let mut count = 1;
@@ -119,7 +120,7 @@ fn respond_delays(chat_id: i32) -> IronResult<()> {
     Ok(())
 }
 
-fn respond_num_delays(chat_id: i32, delay_count: u32) -> IronResult<()> {
+fn respond_num_delays(chat_id: i64, delay_count: u32) -> IronResult<()> {
     const MIN: u32 = 1;
     const MAX: u32 = 9;
     if delay_count < MIN || delay_count > MAX {
@@ -144,7 +145,7 @@ fn respond_num_delays(chat_id: i32, delay_count: u32) -> IronResult<()> {
     Ok(())
 }
 
-fn respond_unknown(chat_id: i32) -> IronResult<()> {
+fn respond_unknown(chat_id: i64) -> IronResult<()> {
     send(chat_id, "Unknown command. Try using /help")?;
     Ok(())
 }

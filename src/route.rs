@@ -14,9 +14,9 @@ use std::io::Read;
 
 pub fn telegram(req: &mut Request) -> IronResult<Response> {
     let mut body = String::new();
-    req.body
-        .read_to_string(&mut body)
-        .map_err(|e| IronError::new(e, (status::BadRequest, "Error reading request")))?;
+    req.body.read_to_string(&mut body).map_err(|e| {
+        IronError::new(e, (status::BadRequest, "Error reading request"))
+    })?;
     let update: telegram::Update = serde_json::from_str(&body).unwrap();
     if let Some(msg) = update.message {
         if let Some(txt) = msg.text {
@@ -75,12 +75,14 @@ fn respond_start(chat_id: i64) -> IronResult<()> {
 }
 
 fn respond_help(chat_id: i64) -> IronResult<()> {
-    send(chat_id,
-         "Available commands:\n\n\
+    send(
+        chat_id,
+        "Available commands:\n\n\
         /start - Subscribes this chat to be notified of SBB delays\n\
         /unsubscribe - Unsubscribes this chat from the delay notifications\n\
         /delays - Shows the last `n` delays\n\
-        /help - Shows this window")?;
+        /help - Shows this window",
+    )?;
     Ok(())
 }
 
@@ -117,7 +119,9 @@ fn respond_delays(chat_id: i64) -> IronResult<()> {
     let markup = InlineKeyboardMarkup { inline_keyboard: buttons };
     let msg = "How many of the last delays to you want to look up?";
     let mut s = String::new();
-    send_with_markup(chat_id, msg, &Some(markup))?.read_to_string(&mut s).unwrap();
+    send_with_markup(chat_id, msg, &Some(markup))?
+        .read_to_string(&mut s)
+        .unwrap();
     Ok(())
 }
 
@@ -125,10 +129,12 @@ fn respond_num_delays(chat_id: i64, delay_count: u32) -> IronResult<()> {
     const MIN: u32 = 1;
     const MAX: u32 = 9;
     if delay_count < MIN || delay_count > MAX {
-        let msg = format!("Invalid number of delays selected, \
+        let msg = format!(
+            "Invalid number of delays selected, \
             please enter a number between {} and {}.",
-                          MIN,
-                          MAX);
+            MIN,
+            MAX
+        );
         send(chat_id, &msg)?;
         return Ok(());
     }

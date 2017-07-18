@@ -16,15 +16,19 @@ pub fn send(chat_id: i64, msg: &str) -> IronResult<reqwest::Response> {
 }
 
 
-pub fn send_with_markup(chat_id: i64,
-                              msg: &str,
-                              markup: &Option<InlineKeyboardMarkup>)
-                              -> IronResult<reqwest::Response> {
-    let url = format!("{}{}{}",
-                      "https://api.telegram.org/bot",
-                      read_env_var(&EnvVar::Token),
-                      "/sendMessage");
-    let mut params = hashmap![
+pub fn send_with_markup(
+    chat_id: i64,
+    msg: &str,
+    markup: &Option<InlineKeyboardMarkup>,
+) -> IronResult<reqwest::Response> {
+    let url = format!(
+        "{}{}{}",
+        "https://api.telegram.org/bot",
+        read_env_var(&EnvVar::Token),
+        "/sendMessage"
+    );
+    let mut params =
+        hashmap![
                 "chat_id" => format!("{}", chat_id),
                 "text" => msg.to_owned(),
                 "parse_mode" => "Markdown".to_owned(),
@@ -33,18 +37,20 @@ pub fn send_with_markup(chat_id: i64,
         params.insert("reply_markup", serde_json::to_string(&markup).unwrap());
     }
     let client = reqwest::Client::new().map_err(|e| {
-                     IronError::new(e,
-                                    (status::InternalServerError, "Error setting up HTTP client"))
-                 })?;
-    client.post(&url)
-        .json(&params)
-        .send()
-        .map_err(|e| IronError::new(e, (status::InternalServerError, "Error sending data")))
+        IronError::new(e, (
+            status::InternalServerError,
+            "Error setting up HTTP client",
+        ))
+    })?;
+    client.post(&url).json(&params).send().map_err(|e| {
+        IronError::new(e, (status::InternalServerError, "Error sending data"))
+    })
 }
 
-pub fn broadcast_with_markup(msg: &str,
-                             markup: &Option<InlineKeyboardMarkup>)
-                             -> Result<(), BroadcastErr> {
+pub fn broadcast_with_markup(
+    msg: &str,
+    markup: &Option<InlineKeyboardMarkup>,
+) -> Result<(), BroadcastErr> {
     for id in chat_ids()? {
         send_with_markup(id, msg, markup)?;
     }
@@ -78,7 +84,9 @@ pub fn register(chat_id: i64) -> Result<bool, BroadcastErr> {
         .create(true)
         .open(&id_file)
         .expect(&format!("Failed to open file {} in append mode", id_file));
-    let mut wtr = csv::WriterBuilder::new().has_headers(false).from_writer(file);
+    let mut wtr = csv::WriterBuilder::new().has_headers(false).from_writer(
+        file,
+    );
 
     wtr.write_record(&[format!("{}", chat_id)])?;
     wtr.flush().expect("Failed to flush CSV writer");
@@ -100,7 +108,9 @@ pub fn unregister(chat_id: i64) -> Result<bool, BroadcastErr> {
 fn write_chat_ids(ids: &[i64]) {
     let filename = read_env_var(&EnvVar::IdFile);
     let file = File::create(filename).unwrap();
-    let mut wtr = csv::WriterBuilder::new().has_headers(false).from_writer(file);
+    let mut wtr = csv::WriterBuilder::new().has_headers(false).from_writer(
+        file,
+    );
     for id in ids {
         wtr.write_record(&[format!("{}", id)]).unwrap();
     }

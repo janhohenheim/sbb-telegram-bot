@@ -46,9 +46,11 @@ pub fn find_whitespace(msg: &str) -> usize {
 
 fn read_raw_env_var(var: &str) -> String {
     env::var_os(var)
-        .expect(&format!("{} must be specified. \
+        .expect(&format!(
+            "{} must be specified. \
                 Did you forget to add it to your .env file?",
-                         var))
+            var
+        ))
         .into_string()
         .expect(&format!("{} does not contain a valid UTF8 string", var))
 }
